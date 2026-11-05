@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bài 1 – Hello Cloud API</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1f2937; }
+  h1 { font-size: 1.6rem; }
+  h2 { margin-top: 2rem; font-size: 1.2rem; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { border: 1px solid #d1d5db; padding: .5rem .7rem; text-align: left; vertical-align: top; }
+  th { background: #f3f4f6; }
+  .todo { background: #fef9c3; }
+  small { color: #6b7280; }
+</style>
+</head>
+<body>
+<h1>Bài 1 – Hello Cloud API</h1>
+<p>Sinh viên: Nguyễn Tiến Trường – MSSV: 2324802010387</p>
+
+<h2>1. Bảng so sánh máy cá nhân và Codespace</h2>
+<table>
+  <thead>
+    <tr><th>Tiêu chí</th><th>Máy cá nhân</th><th>Codespace</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Thời gian từ lúc bắt đầu đến khi chạy được <code>node -v</code></td>
+      <td>Node.js v24.21.0 đã cài sẵn trên máy, mở terminal gõ <code>node -v</code> chạy được sau vài giây</td>
+      <td>Bấm Create codespace lúc 2:27 PM, terminal sẵn sàng và chạy được <code>node -v</code> (v22.23.4) lúc 2:38 PM: khoảng 11 phút</td>
+    </tr>
+    <tr>
+      <td>Số CPU, RAM (từ API)</td>
+      <td>Intel Core i5-12450HX: 12 luồng (8 nhân), RAM 12 GB (khoảng 11,7 GB dùng được)</td>
+      <td>cpus: 2, memoryGB: 7.8</td>
+    </tr>
+    <tr>
+      <td>Hệ điều hành</td>
+      <td>Windows 11 Home, phiên bản 25H2 (OS Build 26200.9711)</td>
+      <td>platform: Linux 6.8.0-1064-azure</td>
+    </tr>
+    <tr>
+      <td>Cách truy cập từ thiết bị khác</td>
+      <td>Phải cấu hình mạng LAN/tường lửa hoặc dùng công cụ tunnel</td>
+      <td>Đặt cổng 3000 ở chế độ Public, mở URL dạng <code>https://zany-broccoli-qw546jgjr5r2rv6-3000.app.github.dev</code>; đã mở thành công trên điện thoại lúc 14:54 và nhận được JSON, sau đó đặt lại Private</td>
+    </tr>
+    <tr>
+      <td>Chi phí, đo bằng gì</td>
+      <td>Điện và khấu hao máy, không có đồng hồ đo riêng</td>
+      <td>Settings → Billing → Usage: lúc 14:58 ngày 5/11/2026 trang báo "No usage found" ($0, chưa ghi nhận core-giờ nào) do số liệu cập nhật chậm, dù codespace 2 CPU đã chạy từ 2:27 PM</td>
+    </tr>
+  </tbody>
+</table>
+<p><small>Các ô nền vàng là số liệu bạn tự đo rồi thay vào, sau đó xóa class="todo".</small></p>
+
+<h2>2. Năm đặc tính NIST qua thao tác thực tế</h2>
+<table>
+  <thead>
+    <tr><th>Đặc tính NIST</th><th>Thao tác đã làm trong bài</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Tự phục vụ theo yêu cầu (on-demand self-service)</td>
+      <td>Tự bấm Create codespace trên main và nhận được môi trường lập trình đầy đủ mà không cần ai cấp phát thủ công.</td>
+    </tr>
+    <tr>
+      <td>Truy cập mạng rộng (broad network access)</td>
+      <td>Đặt cổng 3000 thành Public rồi mở URL app.github.dev trên điện thoại để gọi API.</td>
+    </tr>
+    <tr>
+      <td>Gộp tài nguyên (resource pooling)</td>
+      <td>Kết quả <code>GET /</code> cho thấy tôi được cấp một máy ảo dùng chung tên <code>codespaces-c2add7</code> với 2 CPU và 7,8 GB RAM, chứ không phải một máy vật lý riêng.</td>
+    </tr>
+    <tr>
+      <td>Co giãn nhanh (rapid elasticity)</td>
+      <td>Tạo xong Codespace và chạy được <code>node -v</code> mất khoảng 11 phút ở lần dựng đầu, không cần cài đặt thủ công, và có thể dừng hoặc xóa ngay khi không dùng.</td>
+    </tr>
+    <tr>
+      <td>Dịch vụ đo lường được (measured service)</td>
+      <td>Xem số core-giờ đã dùng ở Settings → Billing → Usage.</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>3. Câu hỏi phản biện</h2>
+<ol>
+  <li><strong>Trường <code>host</code> sau khi Stop rồi Start lại có đổi không?</strong>
+    Lần gọi đầu (5/11/2026): <code>host = codespaces-c2add7</code>. Sau khi Stop lúc 3:01 PM, tôi gọi lại lúc 3:08 PM cùng ngày (cách khoảng 7 phút, chưa phải một ngày): <code>host = codespaces-c2add7</code>, tức là <strong>không đổi</strong>. Tuy nhiên <code>uptimeSec</code> giảm từ 1647 xuống 370, cho thấy máy ảo bên dưới đã được tắt rồi bật lại. Vì vậy tên host chỉ là định danh của codespace, không chứng minh vẫn là cùng một máy vật lý. Điều này cho thấy tài nguyên tính toán được cấp từ kho chung khi Start và thu hồi khi Stop, còn dữ liệu (mã nguồn, <code>node_modules</code>) vẫn được lưu giữ lại.</li>
+  <li><strong>Codespaces là IaaS, PaaS hay SaaS?</strong>
+    Nó gần với PaaS hơn: nhà cung cấp quản lý hạ tầng, hệ điều hành và công cụ nền, còn người dùng quản lý mã nguồn và các gói runtime cài thêm. Nó không phải IaaS thuần vì người dùng không tự quản lý hệ điều hành và máy ảo; cũng không phải SaaS vì người dùng tự viết và vận hành mã của mình.</li>
+  <li><strong>Hai hạn chế của cách cài đặt trên máy phòng lab đã được khắc phục, và một rủi ro mới.</strong>
+    Hạn chế khắc phục: (1) môi trường không đồng nhất giữa các máy, mất thời gian cài đặt lặp lại; (2) phụ thuộc vào máy vật lý ở phòng lab nên khó truy cập từ nơi khác.
+    Rủi ro mới: phụ thuộc vào nhà cung cấp và kết nối Internet, cùng với nguy cơ lộ mã hoặc dữ liệu nếu để cổng Public hoặc repo Public, và chi phí phát sinh nếu quên tắt máy.</li>
+</ol>
+</body>
+</html>
