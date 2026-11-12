@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Bài 1 – Hello Cloud API</title>
+<title>Bài 1 và Bài 2 – notes-api</title>
 <style>
   body { font-family: system-ui, sans-serif; max-width: 860px; margin: 2rem auto; padding: 0 1rem; line-height: 1.55; color: #1f2937; }
   h1 { font-size: 1.6rem; }
@@ -48,7 +48,7 @@
     <tr>
       <td>Chi phí, đo bằng gì</td>
       <td>Điện và khấu hao máy, không có đồng hồ đo riêng</td>
-      <td>Settings → Billing → Usage: lúc 15:16 ngày 5/11/2026, mục Codespaces ghi "compute 2-core" 0,44 giờ (tương đương khoảng 0,88 core-giờ), giá gộp $0,08, số tiền phải trả $0 vì nằm trong hạn mức miễn phí; lưu trữ gần như 0 GB-tháng (&lt;$0,01)</td>
+      <td>Settings → Billing → Usage: lúc 14:58 ngày 5/11/2026 trang báo "No usage found" ($0, chưa ghi nhận core-giờ nào) do số liệu cập nhật chậm, dù codespace 2 CPU đã chạy từ 2:27 PM</td>
     </tr>
   </tbody>
 </table>
@@ -92,6 +92,55 @@
   <li><strong>Hai hạn chế của cách cài đặt trên máy phòng lab đã được khắc phục, và một rủi ro mới.</strong>
     Hạn chế khắc phục: (1) môi trường không đồng nhất giữa các máy, mất thời gian cài đặt lặp lại; (2) phụ thuộc vào máy vật lý ở phòng lab nên khó truy cập từ nơi khác.
     Rủi ro mới: phụ thuộc vào nhà cung cấp và kết nối Internet, cùng với nguy cơ lộ mã hoặc dữ liệu nếu để cổng Public hoặc repo Public, và chi phí phát sinh nếu quên tắt máy.</li>
+</ol>
+
+<hr>
+<h1>Bài 2 – Container và mô phỏng với CloudSim Plus</h1>
+<p>Image GHCR: <code>ghcr.io/pastic123/notes-api:1.0</code></p>
+
+<h2>Phần A – Container</h2>
+<h3>A1. Quan sát hai bản sao</h3>
+<table>
+  <thead><tr><th>Container</th><th>host</th><th>cpus</th><th>memoryGB</th><th>MEM USAGE / LIMIT (docker stats)</th></tr></thead>
+  <tbody>
+    <tr><td>notes1</td><td class="todo">...</td><td class="todo">...</td><td class="todo">...</td><td class="todo">... / ...</td></tr>
+    <tr><td>notes2 (<code>--cpus=0.5 --memory=128m</code>)</td><td class="todo">...</td><td class="todo">...</td><td class="todo">...</td><td class="todo">... / 128MiB</td></tr>
+  </tbody>
+</table>
+
+<h3>A2. So sánh Codespace (máy ảo) và container notes2</h3>
+<table>
+  <thead><tr><th>Tiêu chí</th><th>Codespace (máy ảo)</th><th>Container <code>notes2</code></th></tr></thead>
+  <tbody>
+    <tr><td>Thời gian khởi động</td><td>khoảng 11 phút (từ bài 1)</td><td class="todo"><code>time docker run --rm notes-api:1.0 node -e "1"</code> = ... giây</td></tr>
+    <tr><td>Kích thước</td><td>15 GB-tháng hạn mức đĩa</td><td class="todo">SIZE của <code>docker images</code> = ... MB</td></tr>
+    <tr><td>Nhân hệ điều hành</td><td>riêng (Linux 6.8.0-1064-azure)</td><td class="todo"><code>uname -r</code> trong container = ... ; ngoài máy chủ = ... (giống nhau)</td></tr>
+    <tr><td>Mức cô lập</td><td>Cô lập mạnh: mỗi máy ảo có nhân và phần cứng ảo riêng, qua hypervisor</td><td>Cô lập nhẹ hơn: dùng chung nhân với máy chủ, cô lập bằng namespaces và giới hạn bằng cgroups</td></tr>
+  </tbody>
+</table>
+
+<h3>A3. Image trên GHCR</h3>
+<p>Package (Public): <span class="todo">dán link https://github.com/users/pastic123/packages/container/package/notes-api</span></p>
+
+<h2>Phần B – CloudSim Plus (<code>BasicFirstExample</code>)</h2>
+<table>
+  <thead><tr><th>Lần</th><th>Thay đổi</th><th>Thời điểm hoàn thành cloudlet cuối (giây mô phỏng)</th></tr></thead>
+  <tbody>
+    <tr><td>0</td><td>giữ nguyên</td><td class="todo">...</td></tr>
+    <tr><td>1</td><td>nhân đôi <code>VMS</code></td><td class="todo">...</td></tr>
+    <tr><td>2</td><td>nhân đôi <code>CLOUDLETS</code></td><td class="todo">...</td></tr>
+    <tr><td>3</td><td>đổi bộ lập lịch cloudlet sang <code>CloudletSchedulerSpaceShared</code></td><td class="todo">...</td></tr>
+  </tbody>
+</table>
+
+<h2>Câu hỏi phản biện (Bài 2)</h2>
+<ol>
+  <li><strong>Vì sao API trong <code>notes2</code> vẫn báo <code>memoryGB</code> bằng RAM máy chủ dù đã giới hạn 128 MB?</strong>
+    <code>os.totalmem()</code> đọc thông tin từ nhân hệ điều hành dùng chung (kiểu <code>/proc/meminfo</code>), mà container dùng chung nhân với máy chủ nên thấy RAM của cả máy. Giới hạn <code>--memory</code> do cgroups áp đặt ở một chỗ khác, chỉ hiện trong <code>docker stats</code>. Hệ quả: ứng dụng Node.js hay Java không thể tin vào số RAM/CPU hệ điều hành báo, mà phải đọc giới hạn cgroup (ví dụ <code>os.constrainedMemory()</code> trong Node, hoặc cờ <code>-XX:MaxRAMPercentage</code> với JVM bản mới nhận biết container) hoặc cấu hình trần bộ nhớ rõ ràng (<code>--max-old-space-size</code>, <code>-Xmx</code>). Nếu không, ứng dụng có thể cấp phát vượt 128 MB và bị OOM-kill.</li>
+  <li><strong>Time-shared và space-shared khác nhau ra sao trong kết quả lần 3? Nhà cung cấp đám mây chọn chính sách nào cho gói giá rẻ?</strong>
+    <span class="todo">Viết lại theo số liệu của bạn: time-shared chia nhỏ CPU cho nhiều cloudlet chạy xen kẽ nên tất cả cùng chậm lại và cùng xong muộn; space-shared cho từng cloudlet chiếm lõi đến khi xong, các cloudlet khác xếp hàng nên cloudlet đầu xong sớm còn cloudlet cuối xong muộn hơn. Gói giá rẻ nhiều khả năng chọn time-shared vì nhồi được nhiều khách lên cùng một lõi, tận dụng tài nguyên cao, đổi lại hiệu năng khó dự đoán.</span></li>
+  <li><strong>Mô phỏng giúp ích gì trước khi thuê hạ tầng thật, và kết quả có thể sai lệch ở điểm nào?</strong>
+    Mô phỏng cho phép thử nhiều cấu hình (số máy ảo, bộ lập lịch, tải) nhanh và gần như miễn phí, không tốn tiền thuê hạ tầng. Kết quả có thể lệch vì mô hình đơn giản hóa: bỏ qua độ trễ mạng, nhiễu từ các khách thuê khác dùng chung máy, thời gian khởi động, lỗi phần cứng và tải thực biến động.</li>
 </ol>
 </body>
 </html>
