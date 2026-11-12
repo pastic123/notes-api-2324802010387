@@ -52,7 +52,6 @@
     </tr>
   </tbody>
 </table>
-<p><small>Các ô nền vàng là số liệu bạn tự đo rồi thay vào, sau đó xóa class="todo".</small></p>
 
 <h2>2. Năm đặc tính NIST qua thao tác thực tế</h2>
 <table>
@@ -103,42 +102,48 @@
 <table>
   <thead><tr><th>Container</th><th>host</th><th>cpus</th><th>memoryGB</th><th>MEM USAGE / LIMIT (docker stats)</th></tr></thead>
   <tbody>
-    <tr><td>notes1</td><td class="todo">...</td><td class="todo">...</td><td class="todo">...</td><td class="todo">... / ...</td></tr>
-    <tr><td>notes2 (<code>--cpus=0.5 --memory=128m</code>)</td><td class="todo">...</td><td class="todo">...</td><td class="todo">...</td><td class="todo">... / 128MiB</td></tr>
+    <tr><td>notes1</td><td>f2a293a2cde7</td><td>2</td><td>7.8</td><td>13.44MiB / 7.756GiB</td></tr>
+    <tr><td>notes2 (<code>--cpus=0.5 --memory=128m</code>)</td><td>8ecb9773b284</td><td>2</td><td>7.8</td><td>13.48MiB / 128MiB</td></tr>
   </tbody>
 </table>
+
+<p><strong>Nhận xét:</strong> <code>host</code> của hai container khác nhau (là ID container), nhưng <code>cpus</code> (2), <code>memoryGB</code> (7,8) và cả <code>uptimeSec</code> (thời gian chạy của máy chủ) đều giống nhau và bằng của Codespace, dù notes2 bị giới hạn 0,5 CPU và 128 MB. Giới hạn chỉ hiện trong <code>docker stats</code> (13,48MiB / 128MiB).</p>
 
 <h3>A2. So sánh Codespace (máy ảo) và container notes2</h3>
 <table>
   <thead><tr><th>Tiêu chí</th><th>Codespace (máy ảo)</th><th>Container <code>notes2</code></th></tr></thead>
   <tbody>
-    <tr><td>Thời gian khởi động</td><td>khoảng 11 phút (từ bài 1)</td><td class="todo"><code>time docker run --rm notes-api:1.0 node -e "1"</code> = ... giây</td></tr>
-    <tr><td>Kích thước</td><td>15 GB-tháng hạn mức đĩa</td><td class="todo">SIZE của <code>docker images</code> = ... MB</td></tr>
-    <tr><td>Nhân hệ điều hành</td><td>riêng (Linux 6.8.0-1064-azure)</td><td class="todo"><code>uname -r</code> trong container = ... ; ngoài máy chủ = ... (giống nhau)</td></tr>
+    <tr><td>Thời gian khởi động</td><td>khoảng 11 phút (từ bài 1)</td><td>0,515 giây (<code>time docker run --rm notes-api:1.0 node -e "1"</code>)</td></tr>
+    <tr><td>Kích thước</td><td>15 GB-tháng hạn mức đĩa</td><td>251 MB dung lượng đĩa (DISK USAGE), 63,4 MB nội dung nén (CONTENT SIZE) trong <code>docker images</code></td></tr>
+    <tr><td>Nhân hệ điều hành</td><td>riêng (Linux 6.8.0-1070-azure)</td><td><code>uname -r</code> trong container (notes1 và notes2) = 6.8.0-1070-azure; ngoài máy chủ = 6.8.0-1070-azure (giống nhau)</td></tr>
     <tr><td>Mức cô lập</td><td>Cô lập mạnh: mỗi máy ảo có nhân và phần cứng ảo riêng, qua hypervisor</td><td>Cô lập nhẹ hơn: dùng chung nhân với máy chủ, cô lập bằng namespaces và giới hạn bằng cgroups</td></tr>
   </tbody>
 </table>
 
 <h3>A3. Image trên GHCR</h3>
-<p>Package (Public): <span class="todo">dán link https://github.com/users/pastic123/packages/container/package/notes-api</span></p>
+<p>Package (Public): <a href="https://github.com/users/pastic123/packages/container/package/notes-api">https://github.com/users/pastic123/packages/container/package/notes-api</a></p>
 
 <h2>Phần B – CloudSim Plus (<code>BasicFirstExample</code>)</h2>
 <table>
   <thead><tr><th>Lần</th><th>Thay đổi</th><th>Thời điểm hoàn thành cloudlet cuối (giây mô phỏng)</th></tr></thead>
   <tbody>
-    <tr><td>0</td><td>giữ nguyên</td><td class="todo">...</td></tr>
-    <tr><td>1</td><td>nhân đôi <code>VMS</code></td><td class="todo">...</td></tr>
-    <tr><td>2</td><td>nhân đôi <code>CLOUDLETS</code></td><td class="todo">...</td></tr>
-    <tr><td>3</td><td>đổi bộ lập lịch cloudlet sang <code>CloudletSchedulerSpaceShared</code></td><td class="todo">...</td></tr>
+    <tr><td>0</td><td>giữ nguyên</td><td>20,1 (4 cloudlet cùng bắt đầu lúc 0,1 và chạy 20,0 giây)</td></tr>
+    <tr><td>1</td><td>nhân đôi <code>VMS</code> (2 lên 4)</td><td>45,6 (kết thúc mô phỏng lúc 45,71)</td></tr>
+    <tr><td>2</td><td>nhân đôi <code>CLOUDLETS</code> (4 lên 8)</td><td>40,1 (chỉ 4 trong 8 cloudlet hoàn thành; 4 cloudlet bị trì hoãn vì hết RAM và băng thông của máy ảo; mô phỏng kết thúc lúc 40,22)</td></tr>
+    <tr><td>3</td><td>đổi bộ lập lịch cloudlet sang <code>CloudletSchedulerSpaceShared</code></td><td>20,1 (4 cloudlet cùng bắt đầu lúc 0,1; mô phỏng kết thúc lúc 20,22)</td></tr>
   </tbody>
 </table>
+
+<p><strong>Giải thích lần 1:</strong> bốn máy ảo mỗi máy 4 lõi cần 16 lõi, trong khi máy chủ chỉ có 8 lõi nên chỉ Vm 0 và Vm 1 được đặt vào máy chủ; Vm 2 và Vm 3 báo "No suitable host found". Broker thử tạo lại các máy ảo này nhiều lần (ở các thời điểm 0,10; 5,10; 10,20; 15,30; 20,40; 25,50) rồi đưa chúng vào danh sách thất bại lúc 25,6. Chỉ đến lúc đó 4 cloudlet mới được gửi vào Vm 0 và Vm 1, bắt đầu ở 25,6 và chạy mất 20,0 giây, nên cloudlet cuối xong lúc 45,6. Như vậy 25,6 giây trong số đó là thời gian chờ đặt máy ảo thất bại, không phải thời gian tính toán.</p>
+
+<p><strong>Giải thích lần 2:</strong> mỗi máy ảo có 512 MB RAM và băng thông 1000 Mbps, trong khi mỗi cloudlet yêu cầu 256 MB RAM và 500 Mbps (do mô hình sử dụng tài nguyên 50%). Mỗi máy ảo chỉ đủ RAM và băng thông cho 2 cloudlet cùng lúc, nên khi có 8 cloudlet (4 cho mỗi máy ảo), log báo ở thời điểm 10,10 các cloudlet 4, 5, 6, 7 "requested 256 MB of VmRam but no amount is available" và "requested 500 Mbps of Bandwidth but no amount is available", tức là bị trì hoãn. Kết quả chỉ có 4 cloudlet (0 đến 3) hoàn thành, cùng lúc 40,1 (mỗi cái chạy 40,0 giây, gấp đôi lần 0). Mô phỏng kết thúc lúc 40,22, các máy ảo bị hủy khi mỗi máy còn 2 cloudlet chưa xong, kèm cảnh báo "Some events may have been missed". Như vậy, trong lần này, giới hạn RAM và băng thông của máy ảo, chứ không chỉ số lõi CPU, quyết định số cloudlet chạy được.</p>
 
 <h2>Câu hỏi phản biện (Bài 2)</h2>
 <ol>
   <li><strong>Vì sao API trong <code>notes2</code> vẫn báo <code>memoryGB</code> bằng RAM máy chủ dù đã giới hạn 128 MB?</strong>
     <code>os.totalmem()</code> đọc thông tin từ nhân hệ điều hành dùng chung (kiểu <code>/proc/meminfo</code>), mà container dùng chung nhân với máy chủ nên thấy RAM của cả máy. Giới hạn <code>--memory</code> do cgroups áp đặt ở một chỗ khác, chỉ hiện trong <code>docker stats</code>. Hệ quả: ứng dụng Node.js hay Java không thể tin vào số RAM/CPU hệ điều hành báo, mà phải đọc giới hạn cgroup (ví dụ <code>os.constrainedMemory()</code> trong Node, hoặc cờ <code>-XX:MaxRAMPercentage</code> với JVM bản mới nhận biết container) hoặc cấu hình trần bộ nhớ rõ ràng (<code>--max-old-space-size</code>, <code>-Xmx</code>). Nếu không, ứng dụng có thể cấp phát vượt 128 MB và bị OOM-kill.</li>
   <li><strong>Time-shared và space-shared khác nhau ra sao trong kết quả lần 3? Nhà cung cấp đám mây chọn chính sách nào cho gói giá rẻ?</strong>
-    <span class="todo">Viết lại theo số liệu của bạn: time-shared chia nhỏ CPU cho nhiều cloudlet chạy xen kẽ nên tất cả cùng chậm lại và cùng xong muộn; space-shared cho từng cloudlet chiếm lõi đến khi xong, các cloudlet khác xếp hàng nên cloudlet đầu xong sớm còn cloudlet cuối xong muộn hơn. Gói giá rẻ nhiều khả năng chọn time-shared vì nhồi được nhiều khách lên cùng một lõi, tận dụng tài nguyên cao, đổi lại hiệu năng khó dự đoán.</span></li>
+    Ở lần 3 (space-shared, giữ 4 cloudlet), cả 4 cloudlet bắt đầu lúc 0,1 và xong lúc 20,1, <strong>giống hệt lần 0</strong> (time-shared). Lý do là mỗi máy ảo có 4 lõi và nhận 2 cloudlet, mỗi cloudlet cần 2 lõi, tổng nhu cầu vừa đúng sức máy ảo nên không cloudlet nào phải chờ hay chia nhỏ CPU, và hai bộ lập lịch cho cùng kết quả. Hai chính sách chỉ khác nhau khi tải vượt sức máy ảo: time-shared cho nhiều cloudlet cùng chia CPU nên tất cả chậm lại, còn space-shared dành lõi riêng cho từng cloudlet đến khi xong và các cloudlet còn lại xếp hàng chờ nên thời gian chạy của mỗi cloudlet dễ đoán hơn. Ở lần 2 (time-shared, 8 cloudlet) tôi thấy tải vượt sức máy ảo làm thời gian chạy tăng gấp đôi (40,0 giây so với 20,0 giây) và chỉ 4 cloudlet hoàn thành; tôi chưa chạy space-shared với 8 cloudlet nên không so sánh trực tiếp được trường hợp quá tải. Với gói giá rẻ, nhà cung cấp nhiều khả năng chọn time-shared (nhồi nhiều khách lên cùng một lõi để tận dụng phần cứng và giảm giá thành), đổi lại hiệu năng khó dự đoán khi tải cao; space-shared cho hiệu năng ổn định hơn nên phù hợp gói đắt hơn. Đây là suy luận từ cách hoạt động của hai chính sách, không phải kết luận rút ra riêng từ bảng số liệu.</li>
   <li><strong>Mô phỏng giúp ích gì trước khi thuê hạ tầng thật, và kết quả có thể sai lệch ở điểm nào?</strong>
     Mô phỏng cho phép thử nhiều cấu hình (số máy ảo, bộ lập lịch, tải) nhanh và gần như miễn phí, không tốn tiền thuê hạ tầng. Kết quả có thể lệch vì mô hình đơn giản hóa: bỏ qua độ trễ mạng, nhiễu từ các khách thuê khác dùng chung máy, thời gian khởi động, lỗi phần cứng và tải thực biến động.</li>
 </ol>
